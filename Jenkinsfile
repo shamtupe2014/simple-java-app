@@ -1,42 +1,38 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Build') {
-            steps {
-                // Clean and compile using Maven
-                sh 'mvn clean compile'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                // Run tests using Maven
-                sh 'mvn test'
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                // Package the application
-                sh 'mvn package'
-            }
-        }
-        
-        stage('Deploy') {
-            steps {
-                // Deploy step (for demo, we just echo)
-                echo 'Deploying the application...'
-            }
-        }
+    tools {
+        maven 'Maven' // Name configured in Global Tool Configuration
     }
 
-    post {
-        success {
-            echo 'Pipeline completed successfully.'
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/shamtupe2014/simple-java-app.git'
+            }
         }
-        failure {
-            echo 'Pipeline failed.'
+        
+        stage('Build') {
+            steps {
+                // Use Maven tool configured in Jenkins
+                withMaven(maven: 'Maven') {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                withMaven(maven: 'Maven') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+            }
         }
     }
 }
